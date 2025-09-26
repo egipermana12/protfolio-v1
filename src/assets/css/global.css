@@ -1,0 +1,78 @@
+/* Menerapkan box-sizing ke semua elemen, termasuk pseudo-elemen */
+html {
+    box-sizing: border-box;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+body{
+    background-color: var(--bg);
+    color: var(--text);  
+    margin: 0;  
+    line-height: 1.625;
+}
+
+.bebas_nue_font{
+    font-family: "Bebas Neue", sans-serif;
+}
+
+/*untuk mouse aura*/
+.mouse-aura {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(
+        600px at var(--mouse-x) var(--mouse-y),
+        rgba(29, 78, 216, 0.15), transparent 80%
+      );
+    z-index: 1000;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul, ol {
+    list-style: none;
+    color: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+
+.main{
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1280px;
+    min-height: 100vh;
+    padding-bottom: 3rem;
+    padding-bottom: 3rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* tablet */
+@media (min-width: 768px){
+    .main{
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+        padding-left: 3rem;
+        padding-right: 3rem;
+    }
+}
+
+/* desktop */
+@media (min-width: 1024px) {
+    .main{
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
