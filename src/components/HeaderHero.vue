@@ -183,7 +183,7 @@
     width: 3.5rem;
 }
 
-.name > a{
+.name{
     font-size: 2.25rem;
     line-height: 2.5rem;
 }
@@ -200,15 +200,17 @@
     color: var(--text-secondary);
     max-width: 20rem;
     font-size: 15px;
+    margin-top: 2rem;
 }
 
 
 /* tablet */
 @media (min-width: 768px){
-    .name > a{
+    .name {
         font-size: 3.5rem;
         line-height: .8rem;
         /* text-transform: uppercase; */
+        margin-top: 1.5rem;
     }
 
     .hai{
@@ -224,7 +226,7 @@
         line-height: 1.85rem;
         font-weight: 500;
         color: var(--text);
-        margin-top: -1.6rem;
+        margin-top: 1rem;
     }
 
     .desc{
@@ -250,6 +252,10 @@
 
     .nav{
         display: block;
+    }
+
+    .name {
+        margin-top: 3rem;
     }
 }
 </style>
