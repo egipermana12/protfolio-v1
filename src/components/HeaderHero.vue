@@ -186,12 +186,13 @@
 .name{
     font-size: 2.25rem;
     line-height: 2.5rem;
+    margin-top: 2rem;
 }
 
 .Profesi {
     font-size: 0.98rem;
     line-height: 1.75rem;
-    margin-top: -1.8rem;
+    /*margin-top: -1.8rem;*/
     font-weight: 400;
 }
 
