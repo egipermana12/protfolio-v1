@@ -3,9 +3,9 @@
 	import {useProjectSupabase} from '../stores/projectSupabaseStore'	
 	const supabaseProject = useProjectSupabase()
 
-	onMounted(async () => {
-		await supabaseProject.fetchProject();
-	});
+	onMounted(() => {
+  		supabaseProject.fetchProjects()
+	})
 </script>
 
 <template>
@@ -17,22 +17,35 @@
 				<thead class="table_projects_thead">
 					<tr>
 						<th class="table_projects_th">Project</th>
-						<th class="table_projects_th">Description</th>
 						<th class="table_projects_th">Build with</th>
 					</tr>
 				</thead>
-				<tbody >
+				<!-- loading -->
+		        <tbody v-if="supabaseProject.loading">
+		          <tr><td colspan="2" class="text-center">Loading...</td></tr>
+		        </tbody>
+
+		        <!-- error -->
+		        <tbody v-else-if="supabaseProject.error">
+		          <tr><td colspan="2" class="text-center text-red-500">{{ supabaseProject.error }}</td></tr>
+		        </tbody>
+
+		        <!-- data -->
+				<tbody v-else>
 					<tr class="table_projects_trbody" v-for="project in supabaseProject.projects" :key="project.id">
-						<td class="table_projects_tdbody">
-							<div class="td_higlight">{{project.judul_project}}</div>
+						<td class="table_projects_tdbody td_image">
+							<img :src="project.image" alt="image" class="card_image">
+							<div class="judul_td">
+								<span class="td_higlight">{{project.judul_project}}</span>
+								<span class="td_desc">{{project.desc}}</span>
+							</div>
 						</td>
 						<td class="table_projects_tdbody">
-							<div class="">{{project.desc}}</div>
-						</td>
-						<td class="table_projects_tdbody card_tag">
-							<li class="tag_li" v-for="tag in project.tags">
-                            	<div class="tag_text">{{tag}}</div>
-                        	</li>
+							<div class="card_tag">
+								<li class="tag_li" v-for="tag in project.tags">
+                            		<div class="tag_text">{{tag}}</div>
+                        		</li>
+							</div>
  						</td>
 					</tr>
 				</tbody>
@@ -42,6 +55,15 @@
 </template>
 
 <style scoped>
+	.card_image {
+	    aspect-ratio: 16 / 9;
+	    object-fit: cover;
+	    border-radius: .25rem;
+	    border-width: 2px;
+	    border-color: rgba(226, 232, 240, .1);
+	    max-width: 150px;
+	    height: auto;
+	}
 	.text_projects{
 		letter-spacing: -.025em;
 		font-weight: 700;
@@ -79,6 +101,23 @@
 		border-color: rgba(203, 213, 225, .1);
 	}
 
+	.td_image{
+		display: flex;
+		align-items: start;
+		gap: 0.7rem;
+	}
+
+	.judul_td{
+		display: flex;
+		flex-direction: column;
+		align-items: start;
+		gap: .5rem;
+	}
+
+	.td_desc{
+		font-size: .8rem;
+	}
+
 	.table_projects_tdbody{
 		padding-top: 1rem;
     	padding-bottom: 1rem;
@@ -90,16 +129,16 @@
 	}
 
 	.td_higlight{
+		font-size: .9rem;
 		font-weight: 600;
 		line-height: 1.375;
 		color: var(--text);
 	}
 
 	.card_tag {
-    	margin-top: .5rem;
     	display: flex;
     	flex-wrap: wrap;
-    	transform: translateY(-12px);
+    	margin-top: .5rem;
 	}
 
 	.tag_li {
