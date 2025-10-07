@@ -14,7 +14,7 @@
 		<Sidebar v-model:toggleStatus="isSidebarOpen"/>
 		<div class="main_content" :class="{'main_content_active' : isSidebarOpen}">
 			<nav class="nav_toggle">
-				<button id="sidebar-toggle-button" @click= "toggleSidebar">
+				<button class="toggle_button" id="sidebar-toggle-button" @click= "toggleSidebar">
 					<svg data-slot="icon" class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentcolor"><path d="M13.25 2.5c.69 0 1.25.56 1.25 1.25v8.5c0 .69-.56 1.25-1.25 1.25H7.5V15h5.75A2.75 2.75 0 0 0 16 12.25v-8.5A2.75 2.75 0 0 0 13.25 1H7.5v1.5zM5.75 1a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-3A2.75 2.75 0 0 1 0 12.25v-8.5A2.75 2.75 0 0 1 2.75 1z"></path></svg>
 				</button>
 			</nav>
@@ -50,9 +50,23 @@
 		padding-bottom: 1.2rem;
 	}
 
+	.toggle_button{
+		background-color: transparent;
+		border: none;
+		outline: none;
+		cursor: pointer;
+		padding-inline: .6rem;
+		padding-block: .4rem;
+		border-radius: .3rem;
+	}
+
+	.toggle_button:hover{
+		background-color: var(--text-secondary);
+	}
+
 	.content_utama{
-		padding-left: 2rem;
-		padding-right: 2rem;
+		padding-left: 3.5rem;
+		padding-right: 3.5rem;
 	}
 
 	@media (min-width: 1024px) {

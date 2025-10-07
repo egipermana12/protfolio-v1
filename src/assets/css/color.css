@@ -4,6 +4,11 @@
     --text: #111827;
     --text-secondary: #4b5563;
     --accent: #2563eb;
+    --dark-200: oklch(92.9% 0.013 255.508);
+    --dark-300: oklch(86.9% 0.022 252.894);
+    --dark-400: oklch(55.1% 0.027 264.364);
+    --dark-500: oklch(44.6% 0.03 256.802);
+    --dark-600: oklch(44.6% 0.043 257.281);
   }
   
   [data-theme="dark"] {

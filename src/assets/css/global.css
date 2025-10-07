@@ -55,6 +55,7 @@ table {
     text-indent: 0;
     border-color: inherit;
     border-collapse: collapse;
+    width: 100%;
 }
 
 .main{

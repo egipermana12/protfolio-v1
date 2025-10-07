@@ -1,10 +1,20 @@
 <script setup lang="ts">
-    
+
 </script>
 
 <template>
-    <div>
-        <h1>Daftar Proyek 🛠️</h1>
-        <p>Anda dapat melihat dan mengelola semua proyek di sini.</p>
+    <div class="project_wrapper">
+        <RouterView />
     </div>
 </template>
+
+<style scoped>
+    p{
+        margin: 0;
+        padding: 0;
+    }
+
+    .project_wrapper{
+        margin-top: 2rem;
+    }
+</style>

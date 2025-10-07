@@ -20,12 +20,28 @@ const routes = [
       {
         path: 'project',
         component: () => import('./../pages/admin/Project.vue'),
-      }
+        children: [
+          {
+            path: '',
+            redirect: {name: 'project-table'}
+          },
+          {
+            path: 'list',
+            name: 'project-table',
+            component: () => import('./../pages/admin/ProjectTable.vue'),
+          },
+          {
+            path: 'new',
+            component: () => import('./../pages/admin/ProjectNew.vue'),
+          }
+        ]
+      },
     ]
   }
 ]
 
 const route = createRouter({
+  linkActiveClass: 'active',
   history: createWebHistory(),
   routes,
 })
