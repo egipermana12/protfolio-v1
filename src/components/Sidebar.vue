@@ -1,8 +1,20 @@
 <script setup lang="ts">
 	import {ref, onMounted, onUnmounted} from 'vue'
+	import { useRouter } from 'vue-router'
+	import {useAuthStore} from '@stores/useAuthStore'
+
 	import DetachIcon from '@icons/detach.svg'
 	import OverviewIcon from '@icons/overview.svg'
 	import ClipboardIcon from '@icons/clipboard.svg'
+
+	//handle logout
+	const router = useRouter()
+	const auth = useAuthStore()
+
+	async function handleLogout() {
+	  await auth.logout()
+	  router.push('/login') // arahkan ke login
+	}
 
 	// Definisikan breakpoint Anda di JS agar sesuai dengan CSS
     const MOBILE_BREAKPOINT = 1024; 
@@ -45,19 +57,26 @@
 
 <template>
 	<aside class="sidebar_wrapper" :class="{'active_sidebar' : toggleStatus}" v-click-outside="closeSidebar">
-		<div class="sidebar_header">
-			<span class="">
-				<DetachIcon />
-			</span>
-			<span class="title_header">
-				Admin Panel
-			</span>
+		<div class="sidebar_flex">
+			<div class="link_nya">
+				<div class="sidebar_header">
+					<span class="">
+						<DetachIcon />
+					</span>
+					<span class="title_header">
+						Admin Panel
+					</span>
+				</div>
+				<ul>
+					<li v-for="sidebar in sidebars">
+						<RouterLink :to="sidebar.href" class="sidebar_links"><Component :is="sidebar.icon" class="w-6 h-6 fill-current" /> {{sidebar.name}}</RouterLink> 
+					</li>
+				</ul>
+			</div>
+			<div class="logout_wrapper">
+				<button @click="handleLogout" class="btn_logout">Logout</button>
+			</div>
 		</div>
-		<ul>
-			<li v-for="sidebar in sidebars">
-				<RouterLink :to="sidebar.href" class="sidebar_links"><Component :is="sidebar.icon" class="w-6 h-6 fill-current" /> {{sidebar.name}}</RouterLink> 
-			</li>
-		</ul>
 	</aside>
 </template>
 
@@ -77,6 +96,17 @@
     	z-index: 100;
     	transform: translateX(-100%);
   		transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.sidebar_flex{
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		height: 100%;
+	}
+
+	.link_nya{
+		overflow-y: auto;
 	}
 
 	.active_sidebar{
@@ -109,6 +139,31 @@
 		color: var(--accent);
 	}
 
+	.logout_wrapper{
+		padding-left: .5rem;
+		padding-right: .5rem;
+		padding-top: .6rem;
+		padding-bottom: .6rem;
+	}
+
+	.btn_logout{
+		outline: none;
+		box-sizing: border-box;
+		background: var(--accent);
+		padding: .5rem .5rem;
+		width: 100%;
+		cursor: pointer;
+		border: none;
+		color: var(--text);
+		font-size: .9rem;
+        font-weight: 500;
+        border-radius: .2rem;
+        text-transform: uppercase;
+	}
+
+	.btn_logout:hover{
+		background: #2563eb;
+	}
 
 	/* tablet */
     @media (max-width: 1023px) {

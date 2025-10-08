@@ -1,77 +1,24 @@
 <script setup lang="ts">
+    import { onMounted } from 'vue' 
+    import {usePublicStore} from '../stores/usePublicStore'
+
+    const selectedProjects = usePublicStore()
+
+    onMounted(() => {
+        selectedProjects.fetchPublishProjects()
+    })
+
 	import CardComponent from '@components/CardComponent.vue'
 	import courseCard from '@img/course-card.webp'
 
-	const projects = [
-        {
-            cardTitle: "Build Website Portfolio",
-            cardDesc: "Ini adalah Video course that teaches how to build a web app with the Spotify Web API. Topics covered include the principles of REST APIs, user auth flows, Node, Express, React, Styled Components, and more.",
-            cardTag: [
-                "Php",
-                "Laravel",
-                "Livewire",
-                "MySQL"
-            ],
-            cardImage: courseCard,
-            linkHref: "https://www.google.com/",
-        },
-        {
-            cardTitle: "Build Website Portfolio Dua",
-            cardDesc: "Ini adalah Video course that teaches how to build a web app with the Spotify Web API. Topics covered include the principles of REST APIs, user auth flows, Node, Express, React, Styled Components, and more.",
-            cardTag: [
-                "Php",
-                "Laravel",
-                "Livewire",
-                "MySQL"
-            ],
-            cardImage: courseCard,
-            linkHref: "https://www.google.com/",
-        },
-        {
-            cardTitle: "Build Website Portfolio Dua",
-            cardDesc: "Ini adalah Video course that teaches how to build a web app with the Spotify Web API. Topics covered include the principles of REST APIs, user auth flows, Node, Express, React, Styled Components, and more.",
-            cardTag: [
-                "Php",
-                "Laravel",
-                "Livewire",
-                "MySQL"
-            ],
-            cardImage: courseCard,
-            linkHref: "https://www.google.com/",
-        },
-        {
-            cardTitle: "Build Website Portfolio Dua",
-            cardDesc: "Ini adalah Video course that teaches how to build a web app with the Spotify Web API. Topics covered include the principles of REST APIs, user auth flows, Node, Express, React, Styled Components, and more.",
-            cardTag: [
-                "Php",
-                "Laravel",
-                "Livewire",
-                "MySQL"
-            ],
-            cardImage: courseCard,
-            linkHref: "https://www.google.com/",
-        },
-        {
-            cardTitle: "Build Website Portfolio Dua",
-            cardDesc: "Ini adalah Video course that teaches how to build a web app with the Spotify Web API. Topics covered include the principles of REST APIs, user auth flows, Node, Express, React, Styled Components, and more.",
-            cardTag: [
-                "Php",
-                "Laravel",
-                "Livewire",
-                "MySQL"
-            ],
-            cardImage: courseCard,
-            linkHref: "https://www.google.com/",
-        }
-    ];
 </script>
 
 <template>
 	<section id="projects" class="projects">
         <!-- untuk sticky mobile -->
          <div>
-            <ol class="group_list" v-for="project in projects">
-                <CardComponent :cardTitle="project.cardTitle" :cardDesc="project.cardDesc" :cardImage="project.cardImage" :cardTag="project.cardTag" :linkHref="project.linkHref" />
+            <ol class="group_list" v-for="project in selectedProjects.projects">
+                <CardComponent :cardTitle="project.judul_project" :cardDesc="project.desc" :cardImage="project.thumbnail" :cardTag="project.tags" :linkHref="`/project/${project.id}/${project.slug_project}`" />
             </ol>
          </div>
          <RouterLink to="/projects" rel="noopener noreferrer">View Full Projects Archive</RouterLink>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-defineProps<{ cardTitle: string, cardDesc: string, cardImage: string, cardTag: object, linkHref: string }>()
+    import {getExcerpt} from '@func/UseKumpulanFunc'
+
+    defineProps<{ cardTitle: string, cardDesc: string, cardImage: string, cardTag: object, linkHref: string }>()
 </script>
 
 <template>
     <li class="li_group">
-        <a :href="linkHref" target="_blank" class="card_link">
+        <RouterLink  :to="linkHref" target="_blank" class="card_link">
             <div class="card_wrapper">
                 <!-- untuk hover -->
                 <div class="background_hover"></div>
@@ -14,7 +16,7 @@ defineProps<{ cardTitle: string, cardDesc: string, cardImage: string, cardTag: o
                         <span>{{cardTitle}}</span>
                     </h3>
                     <p class="card_desc">
-                        {{ cardDesc }}
+                        {{getExcerpt(cardDesc, 205)}}
                     </p>
                     <!-- untuk tag -->
                     <ul class="card_tag">
@@ -26,7 +28,7 @@ defineProps<{ cardTitle: string, cardDesc: string, cardImage: string, cardTag: o
                 <!-- untuk image -->
                 <img :src="cardImage" width="200" height="48" alt="image" class="card_image">
             </div>
-        </a>
+        </RouterLink >
     </li>
 </template>
 

@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia'
 import { supabase } from '../supabase/supabaseClient'
-
+import {useAuthStore} from '@stores/useAuthStore'
+import {uploadImageSupabase} from '@func/useUploadImageSupabase'
+ 
+const auth = useAuthStore()
 
 export const useProjectSupabase = defineStore('project', {
 	state: () => ({
@@ -23,7 +26,7 @@ export const useProjectSupabase = defineStore('project', {
 		    }
 		},
 		//insert new data
-		async saveProject({judul_project, desc, image, tags}: {judul_project: string; desc: string; image?: File; tags: object}) {
+		async saveProject({judul_project, slug_project, desc, thumbnail, tags, status}: {judul_project: string; slug_project?: string; status: string;desc: string; thumbnail?: File; tags: string[]}) {
 			this.loading = true
       		this.error = null
 
@@ -35,23 +38,8 @@ export const useProjectSupabase = defineStore('project', {
       			let thumbnailUrl: string | null = null
       			// ✅ Jika ada file thumbnail, upload ke Supabase Storage
       			
-      			if (image) {
-      				const fileExt = image.name.split('.').pop()
-					const fileName = `${Date.now()}.${fileExt}`
-					const filePath = `thumbnails/${fileName}`
-
-					const { error: uploadError } = await supabase.storage
-						.from('portfolio-v1') // <-- bucket name kamu
-						.upload(filePath, image)
-
-					if (uploadError) throw uploadError
-
-					// Dapatkan public URL dari file yang diupload
-					const { data: publicUrlData } = supabase.storage
-						.from('portfolio-v1')
-						.getPublicUrl(filePath)
-
-					thumbnailUrl = publicUrlData.publicUrl
+      			if (thumbnail) {
+					thumbnailUrl = await uploadImageSupabase(thumbnail)
       			}
 
       			// ✅ Insert ke tabel projects
@@ -59,9 +47,12 @@ export const useProjectSupabase = defineStore('project', {
 					.from('projects')
 					.insert([
 						{
-							judul_project,
-							desc,
-							image: thumbnailUrl, // kolom di tabel Supabase
+							user_id: auth.user.id,
+							judul_project: judul_project,
+							slug_project: slug_project,
+							desc: desc,
+							status: status,
+							thumbnail: thumbnailUrl, // kolom di tabel Supabase
 							tags: tags,
 							created_at: new Date().toISOString()
 						}

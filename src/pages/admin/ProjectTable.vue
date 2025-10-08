@@ -46,10 +46,10 @@
                 <tbody v-else>
                     <tr class="table_projects_trbody" v-for="project in supabaseProject.projects" :key="project.id">
                         <td class="table_projects_tdbody td_image">
-                            <img :src="project.image" alt="image" class="card_image">
+                            <img :src="project.thumbnail" alt="image" class="card_image">
                             <div class="judul_td">
                                 <span class="td_higlight">{{project.judul_project}}</span>
-                                <span class="td_desc">{{project.desc}}</span>
+                                <span class="td_desc" v-html="project.desc"></span>
                             </div>
                         </td>
                         <td class="table_projects_tdbody">

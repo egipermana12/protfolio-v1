@@ -69,6 +69,16 @@ table {
     padding-right: 1.5rem;
 }
 
+.err_message{
+    color: red;
+    font-size: .75rem;
+    margin: 0;
+}
+
+.ql-editor {
+    height: 300px !important;
+}
+
 /* tablet */
 @media (min-width: 768px){
     .main{

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 	import { onMounted } from 'vue'	
+	import {getExcerpt} from '@func/UseKumpulanFunc'
+
 	import {useProjectSupabase} from '../stores/projectSupabaseStore'	
 	const supabaseProject = useProjectSupabase()
 
@@ -11,7 +13,7 @@
 <template>
 	<div class="main">
 		<section class="container">
-			<RouterLink to="/" rel="noopener noreferrer">Back</RouterLink>
+			<RouterLink to="/" rel="noopener noreferrer">Back Home</RouterLink>
 			<h3 class="text_projects">All Projects</h3>
 			<table id="content" class="table_projects">
 				<thead class="table_projects_thead">
@@ -34,10 +36,12 @@
 				<tbody v-else>
 					<tr class="table_projects_trbody" v-for="project in supabaseProject.projects" :key="project.id">
 						<td class="table_projects_tdbody td_image">
-							<img :src="project.image" alt="image" class="card_image">
+							<img :src="project.thumbnail" alt="image" class="card_image">
 							<div class="judul_td">
 								<span class="td_higlight">{{project.judul_project}}</span>
-								<span class="td_desc">{{project.desc}}</span>
+								<span class="td_desc">
+									{{getExcerpt(project.desc, 205)}}
+								</span>
 							</div>
 						</td>
 						<td class="table_projects_tdbody">
@@ -116,6 +120,7 @@
 
 	.td_desc{
 		font-size: .8rem;
+		max-width: 24rem;
 	}
 
 	.table_projects_tdbody{
@@ -129,7 +134,7 @@
 	}
 
 	.td_higlight{
-		font-size: .9rem;
+		font-size: 1rem;
 		font-weight: 600;
 		line-height: 1.375;
 		color: var(--text);

@@ -14,6 +14,7 @@ export default defineConfig({
       '@pages': '/src/pages',
       '@func': '/src/func',
       '@utils': '/src/utils',
+      '@stores': '/src/stores',
     }
   }
 })
