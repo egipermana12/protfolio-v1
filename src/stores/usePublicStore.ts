@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { supabase } from '../supabase/supabaseClient'
+import { useRoute, useRouter } from 'vue-router'
 
 export const usePublicStore = defineStore('projectSelected', {
 	state: () => ({
@@ -29,13 +30,13 @@ export const usePublicStore = defineStore('projectSelected', {
       			const { data, error: err } = await supabase.from('projects').select('*').eq('id', uuid).eq('slug_project', slug).single()
 		        
 		        if(err && err.code === 'PGRST116'){
-		        	router.replace('/NotFound') // ✅ Redirect ke halaman not found
+		        	throw new Error('Not found')
     				return
 		        }
 
 		        if (err || !data) {
 				    error.value = err?.message || 'Artikel tidak ditemukan'
-				    router.replace('/NotFound') // ✅ Backup redirect
+				    throw new Error('Not found')
 				    return
 				}
 
@@ -43,6 +44,7 @@ export const usePublicStore = defineStore('projectSelected', {
   				this.loading = false
       		}catch(err: any){
       			this.error = err.message || String(err)
+      			throw err;
       		}finally {
 		        this.loading = false
 		    }

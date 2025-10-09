@@ -54,6 +54,11 @@ const routes = [
     component: () => import('./../pages/NotFound.vue'),
   },
   {
+    path: '/404',
+    name: '404',
+    component: () => import('./../pages/NotFound.vue'),
+  },
+  {
     path: '/project/:uuid/:slug',
     name: 'ProjectDetail',
     component: () => import('./../pages/ProjectDetail.vue'),

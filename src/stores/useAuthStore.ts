@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { supabase } from '../supabase/supabaseClient'
+import route from '../route/route.ts'
 
 export const useAuthStore = defineStore('auth',{
 	state: () => ({
@@ -14,9 +15,21 @@ export const useAuthStore = defineStore('auth',{
 			const { data } = await supabase.auth.getSession()
 			this.session = data.session
       		this.user = data.session?.user ?? null
-      		//tangkap aktivitas user
-      		window.addEventListener('mousemove', this.startAutoLogoutTimer)
-			window.addEventListener('keydown', this.startAutoLogoutTimer)
+
+      		if (this.session) this.startAutoLogoutTimer()
+
+      		// 🔁 Pantau perubahan session Supabase (login/logout/token refresh)
+      		supabase.auth.onAuthStateChange((event, session) =>{
+      			if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      				this.session = session
+			          this.user = session?.user ?? null
+			          this.startAutoLogoutTimer()
+			      }else if (event === 'SIGNED_OUT'){
+			      	this.clearLogoutTimer()
+			          this.session = null
+			          this.user = null
+			      }
+      		})
 		},
 		async fetchUser(){
 			const { data, error } = await supabase.auth.getUser()
@@ -43,7 +56,10 @@ export const useAuthStore = defineStore('auth',{
 		},
 		async logout() {
       		await supabase.auth.signOut()
-      		this.user = null
+      		this.clearLogoutTimer()
+		    this.user = null
+		    this.session = null
+		    router.push('/login')
     	},
 
     	// ⏱️ Timer auto logout setelah 2 jam
