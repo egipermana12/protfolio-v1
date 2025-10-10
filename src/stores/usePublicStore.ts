@@ -14,7 +14,20 @@ export const usePublicStore = defineStore('projectSelected', {
 			this.loading = true
       		this.error = null
       		try{
-      			const { data, error } = await supabase.from('projects').select()
+      			const { data, error } = await supabase.from('projects').select('*').eq('status','publish')
+		        if (error) throw error
+		        this.projects = data ?? []
+      		}catch(err: any){
+      			this.error = err.message || String(err)
+      		}finally {
+		        this.loading = false
+		    }
+		},
+		async fetchSelectedProjects() {
+			this.loading = true
+      		this.error = null
+      		try{
+      			const { data, error } = await supabase.from('projects').select('*').eq('status','publish').eq('selected','selected')
 		        if (error) throw error
 		        this.projects = data ?? []
       		}catch(err: any){

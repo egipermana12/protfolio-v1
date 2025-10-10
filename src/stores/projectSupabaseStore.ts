@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { supabase } from '../supabase/supabaseClient'
 import {useAuthStore} from '@stores/useAuthStore'
 import {uploadImageSupabase} from '@func/useUploadImageSupabase'
+// import route from '../route/route.ts'
  
 const auth = useAuthStore()
 
@@ -71,6 +72,35 @@ export const useProjectSupabase = defineStore('project', {
       		}finally{
       			this.loading = false
       		}
+		},
+		async fetchSingeProject({uuid, slug}: {uuid: string, slug: string}){
+			this.loading = true
+      		this.error = null
+
+      		try{
+      			const { data, error: err } = await supabase.from('projects').select('*').eq('id', uuid).eq('slug_project', slug).single()
+		        
+		        if(err && err.code === 'PGRST116'){
+		        	throw new Error('Not found')
+		        	route.push('/admin')
+    				return
+		        }
+
+		        if (err || !data) {
+				    error.value = err?.message || 'Artikel tidak ditemukan'
+				    throw new Error('Not found')
+				    route.push('/admin')
+				    return
+				}
+
+				this.projects = data ?? null
+  				this.loading = false
+      		}catch(err: any){
+      			this.error = err.message || String(err)
+      			throw err;
+      		}finally {
+		        this.loading = false
+		    }
 		}
 	}
 });

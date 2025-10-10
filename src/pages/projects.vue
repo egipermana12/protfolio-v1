@@ -2,11 +2,11 @@
 	import { onMounted } from 'vue'	
 	import {getExcerpt} from '@func/UseKumpulanFunc'
 
-	import {useProjectSupabase} from '../stores/projectSupabaseStore'	
-	const supabaseProject = useProjectSupabase()
+	import {usePublicStore} from '../stores/usePublicStore'
+	const supabaseProject = usePublicStore()
 
 	onMounted(() => {
-  		supabaseProject.fetchProjects()
+  		supabaseProject.fetchPublishProjects()
 	})
 </script>
 
@@ -35,14 +35,16 @@
 		        <!-- data -->
 				<tbody v-else>
 					<tr class="table_projects_trbody" v-for="project in supabaseProject.projects" :key="project.id">
-						<td class="table_projects_tdbody td_image">
-							<img :src="project.thumbnail" alt="image" class="card_image">
-							<div class="judul_td">
-								<span class="td_higlight">{{project.judul_project}}</span>
-								<span class="td_desc">
-									{{getExcerpt(project.desc, 205)}}
-								</span>
-							</div>
+						<td class="table_projects_tdbody">
+							<RouterLink class="td_image" :to="`/project/${project.id}/${project.slug_project}`">
+								<img :src="project.thumbnail" alt="image" class="card_image">
+								<div class="judul_td">
+									<span class="td_higlight">{{project.judul_project}}</span>
+									<span class="td_desc">
+										{{getExcerpt(project.desc, 205)}}
+									</span>
+								</div>
+							</RouterLink>
 						</td>
 						<td class="table_projects_tdbody">
 							<div class="card_tag">

@@ -1,5 +1,7 @@
 <script setup lang="ts">
     import { onMounted } from 'vue' 
+    import {getExcerpt} from '@func/UseKumpulanFunc'
+
     import Button from '@utils/Button.vue'
     import {useProjectSupabase} from '../../stores/projectSupabaseStore'   
     const supabaseProject = useProjectSupabase()
@@ -49,7 +51,7 @@
                             <img :src="project.thumbnail" alt="image" class="card_image">
                             <div class="judul_td">
                                 <span class="td_higlight">{{project.judul_project}}</span>
-                                <span class="td_desc" v-html="project.desc"></span>
+                                <span class="td_desc">{{getExcerpt(project.desc, 205)}}</span>
                             </div>
                         </td>
                         <td class="table_projects_tdbody">
@@ -58,6 +60,11 @@
                                     <div class="tag_text">{{tag}}</div>
                                 </li>
                             </div>
+                        </td>
+                        <td class="table_projects_tdbody">
+                            <RouterLink :to="`edit/${project.id}/${project.slug_project}`">
+                                Edit
+                            </RouterLink>
                         </td>
                     </tr>
                 </tbody>

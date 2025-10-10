@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { supabase } from '../supabase/supabaseClient'
 import route from '../route/route.ts'
 
+
 export const useAuthStore = defineStore('auth',{
 	state: () => ({
 		user: null as any | null,
@@ -59,14 +60,14 @@ export const useAuthStore = defineStore('auth',{
       		this.clearLogoutTimer()
 		    this.user = null
 		    this.session = null
-		    router.push('/login')
+		    route.push('/login')
     	},
 
     	// ⏱️ Timer auto logout setelah 2 jam
     	startAutoLogoutTimer(){
     		this.clearLogoutTimer()
 
-    		const SESSION_LIMIT = 2 * 60 * 60 * 1000 // 2 jam
+    		const SESSION_LIMIT = 2 * 60 * 60 * 1000 
     		this.logoutTimer = setTimeout(() => {
     			console.warn('⏰ Session expired, auto logout.')
         		this.logout()

@@ -5,7 +5,7 @@
     const selectedProjects = usePublicStore()
 
     onMounted(() => {
-        selectedProjects.fetchPublishProjects()
+        selectedProjects.fetchSelectedProjects()
     })
 
 	import CardComponent from '@components/CardComponent.vue'

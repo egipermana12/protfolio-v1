@@ -39,7 +39,12 @@ const routes = [
             path: 'new',
             component: () => import('./../pages/admin/ProjectNew.vue'),
             meta: { requiresAuth: true },
-          }
+          },
+          {
+            path: 'edit/:uuid/:slug',
+            component: () => import('./../pages/admin/ProjectEdit.vue'),
+            meta: { requiresAuth: true },
+          },
         ]
       },
     ]
