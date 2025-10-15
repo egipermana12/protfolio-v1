@@ -4,6 +4,7 @@
 	import InputRadio from '@utils/InputRadio.vue'
 	import InputChip from '@utils/InputChip.vue'
 	import InputImage from '@utils/InputImage.vue'
+	import ImagePreview from '@utils/ImagePreview.vue'
 	import QuilComponent from '@components/QuilComponent.vue'
 	import {slugify} from '@func/useSlugify'
 	import { useRoute, useRouter } from 'vue-router'
@@ -12,12 +13,14 @@
 	import {useProjectSupabase} from '../../stores/projectSupabaseStore'  
 
 	const supabaseProject = useProjectSupabase()
+	const store = useProjectSupabase()
 
 	const vrouter = useRoute()
 
-	const existingThumbnailUrl = ref<string | null>(null);
+	let existingThumbnailUrl = ref<string | null>(null);
 
 	const form = ref({
+		id: '',
 		judul_project: '',
 		slug_project: '',
 		thumbnail: null as File | null,
@@ -30,14 +33,6 @@
 	  { label: 'Draft', value: 'draft' },
 	  { label: 'Publish', value: 'publish' },
 	]
-
-	const errors = ref({
-		judul_project: '',
-		desc: '',
-		tags: '',
-		thumbnail: '',
-		status: ''
-	})
 
 	onMounted(async () => {
 		const uuid = vrouter.params.uuid as string
@@ -52,13 +47,14 @@
   				uuid: uuid,
   				slug: slug
   			})
-  			const getData = supabaseProject.projects
+  			const getData = supabaseProject.projectDetail
   			// 1. Simpan URL thumbnail yang ada (String)
         	if (getData.thumbnail) {
             	existingThumbnailUrl.value = getData.thumbnail as string;
         	}
   			form.value = {
   				...form.value,
+  				id: getData.id,
   				judul_project: getData.judul_project,
   				slug_project: getData.slug,
 				desc: getData.desc,
@@ -70,6 +66,105 @@
   		}
 	})
 
+	// Fungsi penanganan event dari ImagePreview
+	const handleImageDeletion = () => {
+		// 3. Set existingThumbnailUrl menjadi null
+    	existingThumbnailUrl.value = null;
+
+    	// Opsional: Hapus juga data.thumbnail dari store jika Anda mengaksesnya secara langsung
+	    // dan jika projek belum diperbarui di database
+	    supabaseProject.projects.thumbnail = null; 
+	    
+	    console.log('Thumbnail di ProjectEdit.vue telah di-reset ke null.');
+	}
+
+	const errors = ref({
+		judul_project: '',
+		desc: '',
+		tags: '',
+		thumbnail: '',
+		status: ''
+	})
+
+	const validateForm = () => {
+		errors.value = {judul_project: '', desc: '', tags: ''}
+
+		if(!form.value.judul_project.trim()){
+			errors.value.judul_project = 'Judul tidak boleh kosong'
+		}
+
+		if(!form.value.desc.trim()){
+			errors.value.desc = 'desc tidak boleh kosong'
+		}
+
+
+		if(!form.value.status.trim()){
+			errors.value.status = 'status tidak boleh kosong'
+		}
+
+
+		if(form.value.tags.length < 1){
+			errors.value.tags = 'Tags tidak boleh kosong'
+		}
+
+		if(form.value.thumbnail && !form.value.thumbnail.type.startsWith('image/')){
+			errors.value.desc = 'File harus berupa gambar (jpg/png/webp)'
+		}
+
+		// Jika tidak ada error, return true
+		return !errors.value.judul_project && !errors.value.desc && !errors.value.thumbnail && !errors.value.tags
+	}
+
+	function resetForm() {
+	  form.value.judul_project = ''
+	  form.value.slug_project = ''
+	  form.value.thumbnail = null
+	  form.value.desc = ''
+	  form.value.status = 'draft'
+	  form.value.tags = [] as string[]
+
+	  existingThumbnailUrl = null
+
+	  errors.value = {
+	    judul_project: '',
+	    desc: '',
+	    tags: '',
+	    thumbnail: '',
+	    status: ''
+	  }
+	}
+
+	//fungsi handle update
+	const handleUpdate = async () => {
+		if(!validateForm()){
+			console.warn('belum valid')
+			return		
+		}
+
+		const generatedSlug = slugify(form.value.judul_project);
+		form.value.slug_project = generatedSlug;
+
+		try{
+			const saved = await store.updateProject({
+				uuid: form.value.id,
+				judul_project: form.value.judul_project,
+				slug_project: form.value.slug_project,
+				desc: form.value.desc,
+				thumbnail: form.value.thumbnail,
+				tags: form.value.tags,
+				status: form.value.status
+			})
+			if(saved){
+				alert('data berhasil disimpan')
+				// ✅ Reset form ke nilai awal
+				resetForm()
+			}
+		}catch (err) {
+		    console.error(err)
+		    alert('Gagal menyimpan project.')
+		}
+	}
+
 
 </script>
 
@@ -80,8 +175,13 @@
 			<p v-if="errors.judul_project" class="err_message">{{ errors.judul_project }}</p>
 		</div>
 		<div class="">
-			<InputImage label="Thumbnail Image" v-model="form.thumbnail" :existingUrl="existingThumbnailUrl" />
-			<p v-if="errors.thumbnail" class="err_message">{{ errors.thumbnail }}</p>
+			<div class="" v-if="existingThumbnailUrl !== null">
+				<ImagePreview :defaultPreview="existingThumbnailUrl" :uuid="form.id" label="Thumbnail Previous" @imageDeleted="handleImageDeletion"  />
+			</div>
+			<div class="" v-else>
+				<InputImage label="Thumbnail Image" v-model="form.thumbnail" />
+				<p v-if="errors.thumbnail" class="err_message">{{ errors.thumbnail }}</p>
+			</div>
 		</div>
 		<div class="quilWrapper">
 			<QuilComponent v-model="form.desc" label="Deskripsi Project" />
@@ -101,7 +201,7 @@
 			<p v-if="errors.tags" class="err_message">{{ errors.tags }}</p>
 		</div>
 		<button v-if="supabaseProject.loading" disabled class="btnSubmit">Processing</button>
-		<button v-else @click="handleSubmit" class="btnSubmit">
+		<button v-else @click="handleUpdate" class="btnSubmit">
       		Update Post
     	</button>
 	</div>

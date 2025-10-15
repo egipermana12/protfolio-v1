@@ -1,14 +1,49 @@
 <script setup lang="ts">
-    import { onMounted } from 'vue' 
+    import { onMounted, ref, watch } from 'vue' 
     import {getExcerpt} from '@func/UseKumpulanFunc'
 
     import Button from '@utils/Button.vue'
-    import {useProjectSupabase} from '../../stores/projectSupabaseStore'   
+    import {useProjectSupabase} from '@stores/projectSupabaseStore'   
     const supabaseProject = useProjectSupabase()
+
+    const searchTerm = ref('') 
 
     onMounted(() => {
         supabaseProject.fetchProjects()
     })
+
+    // 🚀 Fungsi baru untuk me-refresh/menampilkan ulang data
+    const handleRefresh = async () => {
+        // Panggil action yang sudah ada untuk mengambil data dari Supabase
+        await supabaseProject.fetchProjects() 
+    }
+
+    // 🚀 Watcher: Panggil fetchProjects setiap kali searchTerm berubah
+    watch(searchTerm, (newTerm) => {
+        // Debouncing opsional: (Untuk mencegah terlalu banyak request saat mengetik)
+        // Jika Anda ingin menunda pencarian 500ms setelah user berhenti mengetik, gunakan setTimeout.
+        
+        supabaseProject.fetchProjects(newTerm) // Panggil dengan searchTerm
+    }, { 
+        // immediate: true // Hapus immediate karena kita sudah memanggilnya di onMounted
+    })
+
+    const handleDeletData = async(uuid: string) => {
+        if (!confirm('Apakah Anda yakin ingin menghapus proyek ini?')) {
+            return;
+        }
+
+        try{
+            const deleteData = await supabaseProject.deleteData({uuid: uuid})
+            alert('Data sukses dihapus')
+
+            //reload data
+            // supabaseProject.fetchProjects()
+        }catch (error) {
+            console.error('Error saat penghapusan:', error);
+            alert('Gagal menghapus proyek: ' + supabaseProject.error);
+        }
+    }
 
 </script>
 
@@ -21,9 +56,24 @@
         <div class="button_fungsi">
             <div class=""></div>
             <div>
+                <Button 
+                    textBtn="Refresh / Tampilkan" 
+                    @click="handleRefresh" 
+                    :disabled="supabaseProject.loading" 
+                />
                 <RouterLink to="/admin/project/new">
                     <Button textBtn="Baru" />
                 </RouterLink>
+            </div>
+        </div>
+        <div class="">
+            <div class="search_wrapper">
+                <input 
+                    type="text" 
+                    v-model="searchTerm" 
+                    placeholder="Cari Judul Proyek..."
+                    class="input_search"
+                />
             </div>
         </div>
         <table id="content" class="table_projects">
@@ -48,7 +98,7 @@
                 <tbody v-else>
                     <tr class="table_projects_trbody" v-for="project in supabaseProject.projects" :key="project.id">
                         <td class="table_projects_tdbody td_image">
-                            <img :src="project.thumbnail" alt="image" class="card_image">
+                            <img v-if="project.thumbnail != null" :src="project.thumbnail" alt="image" class="card_image">
                             <div class="judul_td">
                                 <span class="td_higlight">{{project.judul_project}}</span>
                                 <span class="td_desc">{{getExcerpt(project.desc, 205)}}</span>
@@ -65,6 +115,7 @@
                             <RouterLink :to="`edit/${project.id}/${project.slug_project}`">
                                 Edit
                             </RouterLink>
+                            <button @click="handleDeletData(project.id)">Delete</button>
                         </td>
                     </tr>
                 </tbody>

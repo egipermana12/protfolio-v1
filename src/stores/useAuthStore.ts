@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth',{
 
       		// 🔁 Pantau perubahan session Supabase (login/logout/token refresh)
       		supabase.auth.onAuthStateChange((event, session) =>{
-      			if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      			if (event === 'SIGNED_IN') {
       				this.session = session
 			          this.user = session?.user ?? null
 			          this.startAutoLogoutTimer()
