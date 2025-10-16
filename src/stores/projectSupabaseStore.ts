@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import { supabase } from '../supabase/supabaseClient'
 import {useAuthStore} from '@stores/useAuthStore'
 import {uploadImageSupabase} from '@func/useUploadImageSupabase'
@@ -11,37 +12,62 @@ export const useProjectSupabase = defineStore('project', {
 		projects: [] as any[],
 		projectDetail: null as any | null,
 		loading: false,
-		error: null as string | null
+		error: null as string | null,
+		currentPage: 1,
+		itemsPerPage: 10, // Default 10 data per halaman
+		totalItemsCount: 0,
+		showPagination: false, //untuk paginasi tombol
+		shouldFetchCount: false //State baru: Kontrol apakah count harus diambil
 	}),
 	actions: {
-		async fetchProjects(searchTerm: string = '') {
+		async fetchProjects(searchTerm: string = '', fetchCount: boolean = false) {
 			this.loading = true
       		this.error = null
+
+      		// Terapkan nilai fetchCount ke state
+        	this.shouldFetchCount = fetchCount;
+
+      		// Reset halaman ke 1 jika user melakukan pencarian baru
+			if (searchTerm && this.currentPage !== 1) {
+				this.currentPage = 1
+			}
+      		
+      		const from = (this.currentPage - 1) * this.itemsPerPage;
+            const to = from + this.itemsPerPage - 1;
+
       		try{
-      			let query = supabase.from('projects').select()
+      			// 💡 Logika kunci: Hanya sertakan { count: 'exact' } jika this.shouldFetchCount adalah true
+      			const selectOptions = this.shouldFetchCount ? { count: 'exact' } : {};
+
+      			let query = supabase.from('projects').select('*', selectOptions).order('created_at', { ascending: false })
       			
       			// 🚀 Logika Pencarian Dinamis
       			if(searchTerm){
-      				// Gunakan OR untuk mencari di Judul ATAU Tags (jika tags adalah array/text)
-            		// ilike: Case-insensitive LIKE (cocokkan sebagian string)
-            		// query = query.or(`judul_project.ilike.%${searchTerm}%,tags.cs.["${searchTerm}"]`);
-            		// Jika tags adalah tipe data 'text' atau 'json' biasa, Anda mungkin hanya perlu:
-            		// query = query.or(`judul_project.ilike.%${searchTerm}%,tags.ilike.%${searchTerm}%`);
-            		
-            		// NOTE: Jika tags adalah array JSONB, .cs (contains) harus dicoba dengan input yang tepat.
-		            // Untuk penyederhanaan dan keamanan, kita gunakan ilike pada judul.
-		            // Jika tags adalah JSONB Array, Supabase mencari array element, bukan string parsial.
-		            // Mari kita fokuskan ILIKE pada judul project saja:
 		            query = query.ilike('judul_project', `%${searchTerm}%`); 
       			}
-      			const { data, error } = await query
+
+      			query = query.range(from, to)
+      			const { data, error, count } = await query
+
 		        if (error) throw error
 		        this.projects = data ?? []
+		    	if (this.shouldFetchCount) {
+		    		this.totalItemsCount = count ?? 0
+		    	}
+		    	// 💡 Atur showPagination: true saat count diambil
+            	this.showPagination = this.shouldFetchCount;
+
       		}catch(err: any){
       			this.error = err.message || String(err)
       		}finally {
 		        this.loading = false
 		    }
+		}, 
+		// 💡 Action baru untuk mengaktifkan paginasi (dipanggil oleh tombol "Tampilkan Paginasi")
+		async enablePaginationAndFetchCount(searchTerm: string = ''){
+			// Aktifkan pengambilan count dan ambil data
+	        await this.fetchProjects(searchTerm, true); 
+	        this.showPagination = true; // Konfirmasi bahwa paginasi diaktifka
 		},
 		//insert new data
 		async saveProject({judul_project, slug_project, desc, thumbnail, tags, status}: {judul_project: string; slug_project?: string; status: string;desc: string; thumbnail?: File; tags: string[]}) {
@@ -287,6 +313,19 @@ export const useProjectSupabase = defineStore('project', {
       		}finally{
       			this.loading = false
       		}
-      	}
+      	},
+      	//paginasi
+      	setCurrentPage(page: number) {
+            this.currentPage = page;
+        },
+      
+	},
+	//end action
+	getters: {
+		totalPages(): number{
+			return this.itemsPerPage > 0
+			    ? Math.ceil(this.totalItemsCount / this.itemsPerPage)
+			    : 0;
+		}
 	}
 });

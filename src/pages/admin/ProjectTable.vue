@@ -1,29 +1,49 @@
 <script setup lang="ts">
-    import { onMounted, ref, watch } from 'vue' 
+    import { onMounted, ref, watch, computed } from 'vue' 
+    import { storeToRefs } from 'pinia'
+
     import {getExcerpt} from '@func/UseKumpulanFunc'
 
     import Button from '@utils/Button.vue'
+    import Paginasi from '@components/Paginasi.vue'
     import {useProjectSupabase} from '@stores/projectSupabaseStore'   
     const supabaseProject = useProjectSupabase()
 
     const searchTerm = ref('') 
+    let searchTimeout: ReturnType<typeof setTimeout> | null = null; // Untuk Debouncing
+   
 
     onMounted(() => {
-        supabaseProject.fetchProjects()
+        supabaseProject.fetchProjects(searchTerm.value, false)
     })
 
     // 🚀 Fungsi baru untuk me-refresh/menampilkan ulang data
     const handleRefresh = async () => {
+        supabaseProject.showPagination = false;
         // Panggil action yang sudah ada untuk mengambil data dari Supabase
-        await supabaseProject.fetchProjects() 
+        await supabaseProject.fetchProjects(searchTerm.value, false) 
+        supabaseProject.currentPage = 1; 
+    }
+
+    // 🚀 Fungsi untuk MENGAKTIFKAN Paginasi
+    const enablePagination = async () => {
+        await supabaseProject.enablePaginationAndFetchCount(searchTerm.value);
+        // Setelah ini, totalItemsCount akan terisi, dan showPagination akan jadi true.
     }
 
     // 🚀 Watcher: Panggil fetchProjects setiap kali searchTerm berubah
     watch(searchTerm, (newTerm) => {
+        if (searchTimeout) clearTimeout(searchTimeout);
+
         // Debouncing opsional: (Untuk mencegah terlalu banyak request saat mengetik)
         // Jika Anda ingin menunda pencarian 500ms setelah user berhenti mengetik, gunakan setTimeout.
         
-        supabaseProject.fetchProjects(newTerm) // Panggil dengan searchTerm
+        searchTimeout = setTimeout(() => {
+            supabaseProject.showPagination = false;
+            // Reset ke halaman 1 saat pencarian baru dimulai
+            supabaseProject.currentPage = 1; 
+            supabaseProject.fetchProjects(newTerm, false);
+        }, 300); // Debounce 300ms
     }, { 
         // immediate: true // Hapus immediate karena kita sudah memanggilnya di onMounted
     })
@@ -44,6 +64,14 @@
             alert('Gagal menghapus proyek: ' + supabaseProject.error);
         }
     }
+
+    const { totalItemsCount, totalPages, currentPage, loading } = storeToRefs(supabaseProject)
+
+    const handlePageChange = (newPage: number) => {
+        supabaseProject.setCurrentPage(newPage)
+        supabaseProject.fetchProjects(searchTerm.value, true);
+    }
+
 
 </script>
 
@@ -120,6 +148,21 @@
                     </tr>
                 </tbody>
         </table>
+        <!-- paginasi -->
+        
+        <div class="" v-if="supabaseProject.showPagination && totalPages > 1">
+            <Paginasi  
+                :total-item-count="totalItemsCount"
+                :total-pages="totalPages"
+                :current-page="currentPage"
+                :loading-status="loading"
+                @update:currentPage="handlePageChange"
+            />
+        </div>
+        <div class="" v-else>
+            <button @click="enablePagination" :disabled="supabaseProject.loading">tampil halaman</button>
+        </div>
+        
     </div>
 </template>
 
